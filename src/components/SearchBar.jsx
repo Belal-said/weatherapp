@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { GoSearch } from "react-icons/go";
+import searchIcon from "../assets/images/icon-search.svg";
 import { usePlaceSearch } from "../hooks/usePlaceSearch";
 
 // "Île-de-France, France"
@@ -50,7 +50,7 @@ const SearchBar = ({ onSearch, loading }) => {
     return (
         <form className="search" onSubmit={handleSubmit}>
             <div className="input-div">
-                <GoSearch aria-hidden="true" />
+                <img className="search-icon" src={searchIcon} alt="" />
                 <input
                     type="text"
                     value={query}

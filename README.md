@@ -1,6 +1,6 @@
 <div align="center">
 
-# ☀️ Weather App
+# ☀️ Weather Now
 
 **Current conditions, 7-day forecasts, and hour-by-hour temperatures for any city in the world.**
 
@@ -34,7 +34,7 @@
 
 ## Overview
 
-Weather App is a single-page React application. It turns a city name into a clear weather dashboard: what it's like right now, what the week looks like, and how the temperature changes hour by hour on any day of the week.
+Weather Now is a single-page React application. It turns a city name into a clear weather dashboard: what it's like right now, what the week looks like, and how the temperature changes hour by hour on any day of the week.
 
 All data comes from the free [Open-Meteo](https://open-meteo.com/) APIs, so the project runs with no accounts, API keys or environment variables.
 
@@ -59,7 +59,7 @@ All data comes from the free [Open-Meteo](https://open-meteo.com/) APIs, so the 
 | UI | [React 19](https://react.dev/) with hooks |
 | Build tool | [Vite 8](https://vite.dev/) |
 | HTTP client | [Axios](https://axios-http.com/) |
-| Icons | [react-icons](https://react-icons.github.io/react-icons/) and emoji |
+| Design | [Frontend Mentor](https://www.frontendmentor.io/) weather app challenge: DM Sans and Bricolage Grotesque fonts, SVG UI icons and illustrated weather icons |
 | Linting | [ESLint](https://eslint.org/) with the React Hooks and React Refresh plugins |
 | Data | [Open-Meteo Geocoding](https://open-meteo.com/en/docs/geocoding-api) and [Forecast](https://open-meteo.com/en/docs) APIs |
 
@@ -115,7 +115,7 @@ src/
 │   ├── usePlaceSearch.js     # Search-as-you-type place suggestions
 │   └── useDismiss.js         # Closes menus on outside click or Escape
 ├── utils/
-│   ├── getIcon.js            # WMO weather code → icon
+│   ├── weatherIcon.js        # WMO weather code → icon and label
 │   ├── formatDate.js         # Date and time formatting helpers
 │   ├── units.js              # Unit systems, menu options and labels
 │   └── storage.js            # localStorage cache with expiry
@@ -128,7 +128,9 @@ src/
 │   ├── WeekDays.jsx          # 7-day forecast
 │   ├── HourlyForecast.jsx    # Hourly temperatures for the selected day
 │   └── DaySelect.jsx         # Day dropdown in the Hourly Forecast header
-├── images/                   # Static images (logo)
+├── assets/
+│   ├── fonts/                # DM Sans and Bricolage Grotesque (with their OFL licenses)
+│   └── images/               # Logo, UI icons, weather icons, hero backgrounds
 ├── App.jsx                   # Root component and page layout
 ├── main.jsx                  # Application entry point
 └── index.css                 # Global styles
@@ -376,7 +378,7 @@ A `Place` is `{ id, name, region, country, latitude, longitude }`.
 | | `dayName("2026-09-29", "short")` | `"Tue"` |
 | `fullDate(time)` | `fullDate("2026-09-29T14:00")` | `"Tuesday, Sep 29, 2026"` |
 | `hourLabel(time)` | `hourLabel("2026-09-29T14:00")` | `"2 PM"` |
-| `getIcon(code, isDay)` | `getIcon(0, 0)` | `"🌙"` |
+| `getWeatherIcon(code)` | `getWeatherIcon(61)` | `{ src: icon-rain.webp, label: "Rain" }` |
 | `isMetric(units)` | `isMetric(METRIC)` | `true` |
 
 `units.js` also exports `METRIC`, `IMPERIAL`, `UNIT_OPTIONS` (the Units menu contents), `WIND_LABEL` and `PRECIPITATION_LABEL`.
@@ -385,18 +387,20 @@ A `Place` is `{ id, name, region, country, latitude, longitude }`.
 
 ### Weather codes
 
-`getIcon` maps [WMO weather codes](https://open-meteo.com/en/docs#weather_variable_documentation) to icons:
+`getWeatherIcon` maps [WMO weather codes](https://open-meteo.com/en/docs#weather_variable_documentation) to the design's icons. The label is used as the image's `alt` text, so screen readers announce the condition.
 
-| Code | Condition | Day | Night |
-|---|---|:---:|:---:|
-| 0 | Clear sky | ☀️ | 🌙 |
-| 1–2 | Mainly clear, partly cloudy | 🌤️ | ☁️ |
-| 3 | Overcast | ☁️ | ☁️ |
-| 45–48 | Fog | 🌫️ | 🌫️ |
-| 51–67 | Drizzle, rain | 🌧️ | 🌧️ |
-| 71–77 | Snow | ❄️ | ❄️ |
-| 80–82 | Rain showers | 🌦️ | 🌦️ |
-| 85–99 | Snow showers, thunderstorm | ⛈️ | ⛈️ |
+| Code | Label | Icon file |
+|---|---|---|
+| 0 | Clear sky | `icon-sunny.webp` |
+| 1–2 | Partly cloudy | `icon-partly-cloudy.webp` |
+| 3 | Overcast | `icon-overcast.webp` |
+| 45–48 | Fog | `icon-fog.webp` |
+| 51–57 | Drizzle | `icon-drizzle.webp` |
+| 61–67 | Rain | `icon-rain.webp` |
+| 71–77 | Snow | `icon-snow.webp` |
+| 80–82 | Rain showers | `icon-rain.webp` |
+| 85–86 | Snow showers | `icon-snow.webp` |
+| 95–99 | Thunderstorm | `icon-storm.webp` |
 
 ---
 
@@ -409,12 +413,10 @@ A `Place` is `{ id, name, region, country, latitude, longitude }`.
 **Behaviour**
 
 - Units and the last place aren't saved, so a page reload resets them.
-- Emoji icons look different on each operating system and don't match the design's illustrated icons.
 
 **Layout and accessibility**
 
-- `scrollbar-width: none` on every element hides scrollbars, including in scrollable areas such as the hourly list.
-- Headings skip levels (`h1` → `h2` → `h4`), and "Daily Forecast" is plain text rather than a heading.
+- The design has no night icons, so clear nights also show the sun icon.
 
 **Project**
 
@@ -448,6 +450,7 @@ Please run `npm run lint` before submitting.
 ## Acknowledgements
 
 - Weather and geocoding data by [Open-Meteo](https://open-meteo.com/), licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)
+- Design, fonts and icons from the [Frontend Mentor](https://www.frontendmentor.io/) weather app challenge. Fonts licensed under the [SIL Open Font License](https://openfontlicense.org/)
 - Weather codes follow the [WMO](https://open-meteo.com/en/docs#weather_variable_documentation) standard
 
 ---

@@ -1,6 +1,8 @@
 import { useRef, useState } from "react";
-import { IoCheckmark, IoChevronDown, IoSettingsOutline } from "react-icons/io5";
-import logo from "../images/image.png";
+import logo from "../assets/images/logo.svg";
+import unitsIcon from "../assets/images/icon-units.svg";
+import dropdownIcon from "../assets/images/icon-dropdown.svg";
+import checkIcon from "../assets/images/icon-checkmark.svg";
 import { useDismiss } from "../hooks/useDismiss";
 import { IMPERIAL, METRIC, UNIT_OPTIONS, isMetric } from "../utils/units";
 
@@ -15,10 +17,7 @@ export default function Navbar({ units, onUnitsChange }) {
     return (
         // <header> is the page's banner landmark
         <header className="navbar">
-            <div className="logo-name-container">
-                <img src={logo} className="logo-image" alt="" />
-                <p className="weather-app">Weather App</p>
-            </div>
+            <img src={logo} className="logo" alt="Weather Now" />
 
             <div className="units" ref={menuRef}>
                 <button
@@ -28,7 +27,7 @@ export default function Navbar({ units, onUnitsChange }) {
                     aria-expanded={open}
                     onClick={() => setOpen(!open)}
                 >
-                    <IoSettingsOutline aria-hidden="true" /> Units <IoChevronDown aria-hidden="true" />
+                    <img src={unitsIcon} alt="" /> Units <img src={dropdownIcon} alt="" />
                 </button>
 
                 {open && (
@@ -57,7 +56,7 @@ export default function Navbar({ units, onUnitsChange }) {
                                             }
                                         >
                                             {option.label}
-                                            {active && <IoCheckmark aria-hidden="true" />}
+                                            {active && <img src={checkIcon} alt="" />}
                                         </button>
                                     );
                                 })}

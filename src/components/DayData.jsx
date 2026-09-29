@@ -1,7 +1,9 @@
-import { getIcon } from "../utils/getIcon";
+import { getWeatherIcon } from "../utils/weatherIcon";
 import { fullDate } from "../utils/formatDate";
 
 export default function DayData({ current, country, name }) {
+    const icon = getWeatherIcon(current.code);
+
     return (
         <div className="day-data">
             <div className="hero">
@@ -13,9 +15,7 @@ export default function DayData({ current, country, name }) {
                 </div>
 
                 <div className="hero-right">
-                    <span className="day-icon" aria-hidden="true">
-                        {getIcon(current.code, current.isDay)}
-                    </span>
+                    <img className="day-icon" src={icon.src} alt={icon.label} />
                     <span className="hero-temp">{current.temp}°</span>
                 </div>
             </div>

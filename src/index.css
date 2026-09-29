@@ -1,45 +1,120 @@
-:root {
-    /* Colors */
-    --color-text: white;
-    --color-bg: rgb(1, 1, 52);
-    --color-surface: #262840;
-    --color-panel: #2e3047;
-    --color-border: #3a3b55;
-    --color-control: #3c3b5e;
-    --color-control-hover: #45446b;
-    --color-accent: #4147bf;
-    --color-accent-dark: #2a26a6;
-    --color-text-input: rgb(235, 233, 233);
-    --color-text-soft: rgb(212, 209, 209);
-    --color-text-muted: rgb(173, 172, 172);
-    --color-error: #ff8a80;
-
-    /* Effects */
-    --shadow-color: rgba(0, 0, 0, 0.4);
+/* ---------- Fonts (from the design's style guide) ---------- */
+@font-face {
+    font-family: "DM Sans";
+    src: url("./assets/fonts/DMSans-Light.ttf") format("truetype");
+    font-weight: 300;
+    font-display: swap;
 }
 
+@font-face {
+    font-family: "DM Sans";
+    src: url("./assets/fonts/DMSans-Medium.ttf") format("truetype");
+    font-weight: 500;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "DM Sans";
+    src: url("./assets/fonts/DMSans-SemiBold.ttf") format("truetype");
+    font-weight: 600;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "DM Sans";
+    src: url("./assets/fonts/DMSans-SemiBoldItalic.ttf") format("truetype");
+    font-weight: 600;
+    font-style: italic;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "DM Sans";
+    src: url("./assets/fonts/DMSans-Bold.ttf") format("truetype");
+    font-weight: 700;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Bricolage Grotesque";
+    src: url("./assets/fonts/BricolageGrotesque-Bold.ttf") format("truetype");
+    font-weight: 700;
+    font-display: swap;
+}
+
+/* ---------- Design tokens ---------- */
+:root {
+    /* Style guide colors */
+    --neutral-900: hsl(243, 96%, 9%);
+    --neutral-800: hsl(243, 27%, 20%);
+    --neutral-700: hsl(243, 23%, 24%);
+    --neutral-600: hsl(243, 23%, 30%);
+    --neutral-300: hsl(240, 6%, 70%);
+    --neutral-200: hsl(250, 6%, 84%);
+    --neutral-0: hsl(0, 0%, 100%);
+    --orange-500: hsl(28, 100%, 52%);
+    --blue-500: hsl(233, 67%, 56%);
+    --blue-700: hsl(248, 70%, 36%);
+    --color-error: #ff8a80;
+
+    /* Typography */
+    --font-body: "DM Sans", system-ui, sans-serif;
+    --font-display: "Bricolage Grotesque", "DM Sans", system-ui, sans-serif;
+
+    /* Shapes and effects */
+    --radius-sm: 0.5rem;
+    --radius-md: 0.75rem;
+    --radius-lg: 1.25rem;
+    --shadow-color: hsl(243, 96%, 3%, 0.5);
+}
+
+/* ---------- Base ---------- */
 * {
     padding: 0;
     margin: 0;
     box-sizing: border-box;
-    scrollbar-width: none;
 }
 
 body {
-    background-color: var(--color-bg);
-    color: var(--color-text);
-    font-family: Arial, Helvetica, sans-serif;
-    scrollbar-width: none;
+    background-color: var(--neutral-900);
+    color: var(--neutral-0);
+    font-family: var(--font-body);
+    font-size: 1.125rem; /* 18px body copy */
+    line-height: 1.2;
 }
 
+img {
+    display: block;
+    max-width: 100%;
+}
+
+button,
+input {
+    font: inherit;
+    color: inherit;
+}
+
+h1 {
+    font-family: var(--font-display);
+    font-size: 3.25rem;
+    line-height: 1.2;
+    text-align: center;
+}
+
+.section-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+/* ---------- Layout ---------- */
 .container {
-    margin: auto;
-    width: 80%;
+    width: min(76rem, 100% - 2rem);
+    margin-inline: auto;
     display: flex;
     flex-direction: column;
-    justify-content: center;
     align-items: center;
     gap: 4rem;
+    padding-block-end: 5rem;
 }
 
 /* Main landmark: holds the heading and everything below the header */
@@ -55,51 +130,140 @@ body {
     display: flex;
     flex-direction: column;
     width: 100%;
-    justify-content: center;
     align-items: center;
     gap: 3rem;
-    padding-block-end: 2rem;
 }
 
-@media (max-width: 37.5em) {
-    .container h1 {
-        text-align: center;
-    }
+.data {
+    display: flex;
+    gap: 2rem;
+    width: 100%;
+    align-items: stretch; /* hourly panel matches the left column's height */
 }
 
-/* Search */
+.main-data {
+    display: flex;
+    flex: 1 1 0; /* takes the space next to the hourly panel */
+    min-width: 0;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+/* ---------- Navbar ---------- */
 .navbar {
     display: flex;
     justify-content: space-between;
     align-items: center;
     width: 100%;
-    padding: 1.5rem 0;
+    padding-block-start: 3rem;
 }
 
+.logo {
+    height: 2.5rem;
+    width: auto;
+}
+
+/* Units menu */
+.units {
+    position: relative;
+}
+
+.units-button {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    padding: 0.75rem 1rem;
+    background-color: var(--neutral-800);
+    border: none;
+    border-radius: var(--radius-sm);
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.units-button:hover,
+.units-button[aria-expanded="true"] {
+    background-color: var(--neutral-700);
+}
+
+.units-menu {
+    position: absolute;
+    inset-inline-end: 0;
+    inset-block-start: calc(100% + 0.625rem);
+    z-index: 20;
+    width: 13.375rem;
+    padding: 0.375rem 0.5rem;
+    background-color: var(--neutral-800);
+    border: 1px solid var(--neutral-600);
+    border-radius: var(--radius-md);
+    box-shadow: 0 0.5rem 1rem var(--shadow-color);
+}
+
+.units-switch,
+.units-option {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    padding: 0.625rem 0.5rem;
+    background: none;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-size: 1rem;
+    font-weight: 500;
+    text-align: start;
+    cursor: pointer;
+}
+
+.units-switch:hover,
+.units-option:hover,
+.units-option.active {
+    background-color: var(--neutral-700);
+}
+
+.units-group {
+    padding-block-start: 0.25rem;
+    margin-block-start: 0.25rem;
+    border-block-start: 1px solid var(--neutral-600);
+}
+
+.units-group-title {
+    padding: 0.375rem 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--neutral-300);
+}
+
+/* ---------- Search ---------- */
 .search {
     display: flex;
     gap: 1rem;
-    width: 50%;
-    justify-content: center;
+    width: min(41rem, 100%);
 }
 
 .input-div {
     position: relative; /* anchors the suggestions list */
     display: flex;
-    height: 2.5rem;
-    width: 100%;
-    background-color: var(--color-surface);
+    flex: 1;
     align-items: center;
-    padding: 0 0.5rem;
-    border-radius: 0.5rem;
+    gap: 1rem;
+    height: 3.5rem;
+    padding-inline: 1.5rem;
+    background-color: var(--neutral-800);
+    border-radius: var(--radius-md);
+}
+
+.search-icon {
+    width: 1.25rem;
+    flex-shrink: 0;
 }
 
 .input-div input {
     flex: 1;
-    color: var(--color-text-input);
+    min-width: 0;
+    font-size: 1.25rem;
+    font-weight: 500;
     outline: none;
-    font-size: 1rem;
-    padding: 0 1rem;
 }
 
 .input-div .search-input {
@@ -107,66 +271,207 @@ body {
     border: none;
 }
 
+.search-input::placeholder {
+    color: var(--neutral-200);
+}
+
 .search-button {
-    background-color: var(--color-accent);
-    color: var(--color-text);
+    height: 3.5rem;
+    padding-inline: 1.5rem;
+    background-color: var(--blue-500);
     border: none;
-    padding: 0 1.5rem;
-    border-radius: 0.5rem;
+    border-radius: var(--radius-md);
+    font-size: 1.25rem;
+    font-weight: 500;
     cursor: pointer;
-    height: 2.5rem;
 }
 
-@media (max-width: 37.5em) {
-    .search {
-        flex-direction: column;
-        width: 100%;
-    }
-
-    .input-div {
-        width: 100%;
-    }
+.search-button:disabled {
+    opacity: 0.7;
+    cursor: wait;
 }
 
-/* Data */
-
-.data {
+/* Place suggestions */
+.suggestions {
+    position: absolute;
+    inset-block-start: calc(100% + 0.625rem);
+    inset-inline: 0;
+    z-index: 30;
     display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    padding: 0.5rem;
+    list-style: none;
+    background-color: var(--neutral-800);
+    border: 1px solid var(--neutral-700);
+    border-radius: var(--radius-md);
+    box-shadow: 0 0.5rem 1rem var(--shadow-color);
+}
+
+.suggestion {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    padding: 0.5rem;
+    border: 1px solid transparent;
+    border-radius: var(--radius-sm);
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.suggestion.active {
+    background-color: var(--neutral-700);
+    border-color: var(--neutral-600);
+}
+
+.suggestion-details,
+.suggestion-status {
+    font-size: 0.875rem;
+    color: var(--neutral-300);
+}
+
+.suggestion-status {
+    padding: 0.5rem;
+}
+
+/* Status messages */
+.status {
+    color: var(--neutral-200);
+}
+
+.status.error {
+    color: var(--color-error);
+}
+
+/* ---------- Current weather (hero) ---------- */
+.hero {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    min-height: 17.875rem;
+    padding: 1.5rem;
+    background: url("./assets/images/bg-today-large.svg") center / cover no-repeat;
+    border-radius: var(--radius-lg);
+}
+
+.hero-left {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.hero-left h2 {
+    font-size: 1.75rem;
+    font-weight: 700;
+}
+
+.hero-left p {
+    color: var(--neutral-200);
+    font-weight: 500;
+}
+
+.city {
+    text-transform: capitalize;
+}
+
+.hero-right {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+}
+
+.day-icon {
+    width: 7.5rem;
+}
+
+.hero-temp {
+    font-size: 6rem;
+    font-weight: 600;
+    font-style: italic;
+    line-height: 1;
+}
+
+/* ---------- Details (feels like, humidity, ...) ---------- */
+.breakdown {
+    display: flex;
+    gap: 1.5rem;
+}
+
+.breakdown-item {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 0; /* the four cards share the row equally */
+    min-width: 0;
+    gap: 1.25rem;
+    padding: 1.25rem;
+    background-color: var(--neutral-800);
+    border: 1px solid var(--neutral-600);
+    border-radius: var(--radius-md);
+}
+
+.item-title {
+    font-weight: 500;
+    color: var(--neutral-200);
+}
+
+.item-value {
+    font-size: 2rem;
+    font-weight: 300;
+}
+
+/* ---------- Daily forecast ---------- */
+.week {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    margin-block-start: 1rem;
+}
+
+.days {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
     gap: 1rem;
+}
+
+.day {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 0.625rem;
+    background-color: var(--neutral-800);
+    border: 1px solid var(--neutral-600);
+    border-radius: var(--radius-md);
+}
+
+.day-name {
+    font-weight: 500;
+}
+
+.day .icon {
+    width: 3.75rem;
+}
+
+.min-max {
+    display: flex;
     justify-content: space-between;
     width: 100%;
-    align-items: stretch; /* hourly panel matches the left column's height */
+    gap: 0.5rem;
+    font-size: 1rem;
+    font-weight: 500;
 }
 
-.main-data {
-    display: flex;
-    flex: 2 1 0; /* about two thirds of the width, like the design */
-    min-width: 0;
-    flex-direction: column;
-    justify-content: space-between;
-    gap: 2rem;
-}
-
-@media (max-width: 37.5em) {
-    .data {
-        padding-block-end: 1rem;
-    }
-    .main-data {
-        gap: 2rem;
-    }
-}
-
-/* Hourly Temp */
+/* ---------- Hourly forecast ---------- */
 .hourly-data {
     display: flex;
     flex-direction: column;
-    gap: 1rem;
-    background-color: var(--color-panel);
-    padding: 1rem;
-    border-radius: 0.75rem;
-    scrollbar-width: none;
-    flex: 1 1 0; /* about one third of the width */
+    flex: 0 1 24rem; /* 384px wide, like the design */
     min-width: 0;
+    gap: 1rem;
+    padding: 1.5rem;
+    background-color: var(--neutral-800);
+    border-radius: var(--radius-lg);
 }
 
 .hourly-data-header {
@@ -177,9 +482,7 @@ body {
     align-items: center;
 }
 
-.hourly-data-header h4 {
-    font-size: 0.875rem;
-    font-weight: bold;
+.hourly-data-header .section-title {
     white-space: nowrap;
 }
 
@@ -193,17 +496,17 @@ body {
     align-items: center;
     gap: 0.75rem;
     padding: 0.5rem 1rem;
-    background-color: var(--color-control);
-    color: var(--color-text);
+    background-color: var(--neutral-600);
     border: none;
-    border-radius: 0.5rem;
-    font-size: 0.95rem;
+    border-radius: var(--radius-sm);
+    font-size: 1rem;
+    font-weight: 500;
     cursor: pointer;
 }
 
 .day-select-button:hover,
 .day-select-button[aria-expanded="true"] {
-    background-color: var(--color-control-hover);
+    background-color: var(--neutral-700);
 }
 
 /* Animate only when the user hasn't asked their system for reduced motion */
@@ -220,20 +523,20 @@ body {
 .day-select-menu {
     position: absolute;
     inset-inline-end: 0;
-    inset-block-start: calc(100% + 0.5rem);
+    inset-block-start: calc(100% + 0.625rem);
     z-index: 20;
     width: 13.375rem;
     padding: 0.5rem;
     list-style: none;
-    background-color: var(--color-surface);
-    border: 1px solid var(--color-border);
-    border-radius: 0.75rem;
-    box-shadow: 0 10px 30px var(--shadow-color);
+    background-color: var(--neutral-800);
+    border: 1px solid var(--neutral-600);
+    border-radius: var(--radius-md);
+    box-shadow: 0 0.5rem 1rem var(--shadow-color);
 }
 
 .day-select-button:focus-visible,
 .day-select-menu:focus-visible {
-    outline: 2px solid var(--color-text);
+    outline: 2px solid var(--neutral-0);
     outline-offset: 2px;
 }
 
@@ -241,15 +544,16 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0.6rem 0.75rem;
-    border-radius: 0.5rem;
-    font-size: 0.95rem;
+    padding: 0.625rem 0.5rem;
+    border-radius: var(--radius-sm);
+    font-size: 1rem;
+    font-weight: 500;
     cursor: pointer;
 }
 
 .day-select-option.active,
 .day-select-option.selected {
-    background-color: var(--color-border);
+    background-color: var(--neutral-700);
 }
 
 .day-select-option + .day-select-option {
@@ -263,227 +567,40 @@ body {
     flex: 1 1 0; /* fill the space under the header */
     min-height: 0; /* allow shrinking so the list scrolls */
     overflow-y: auto;
-    border-radius: 0.5rem;
-    padding: 0.1rem;
+    padding-inline-end: 0.25rem; /* room for the scrollbar */
+    scrollbar-width: thin;
+    scrollbar-color: var(--neutral-600) transparent;
 }
 
 .hourly-temp {
     display: flex;
     justify-content: space-between;
-    gap: 4rem;
-    padding: 1.2rem 1rem;
-    background-color: var(--color-surface);
-    border-radius: 0.5rem;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.625rem 1rem 0.625rem 0.75rem;
+    background-color: var(--neutral-700);
+    border: 1px solid var(--neutral-600);
+    border-radius: var(--radius-sm);
 }
 
 .item-time {
-    font-weight: bold;
-    display: flex;
-    gap: 0.5rem;
-}
-
-/* Hero */
-.hero {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 6rem 2rem;
-    background: linear-gradient(to right, var(--color-accent), var(--color-accent-dark));
-    border-radius: 1rem;
-}
-
-.city {
-    text-transform: capitalize;
-}
-
-.hero-left {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-}
-
-.hero-temp {
-    font-size: 4.5rem;
-    font-weight: 700;
-    font-style: italic;
-}
-
-.hero-right {
-    display: flex;
-    gap: 2rem;
-    justify-content: center;
-    align-items: center;
-    padding-inline-end: 2rem;
-}
-
-@media (max-width: 37.5em) {
-    .hero {
-        display: flex;
-        flex-direction: column;
-        text-align: center;
-        justify-content: space-between;
-        align-items: center;
-        gap: 2rem;
-        padding: 4rem 2rem;
-        background: linear-gradient(to right, var(--color-accent), var(--color-accent-dark));
-        border-radius: 1rem;
-    }
-
-    .hero-left h2 {
-        font-size: 2.4rem;
-    }
-
-    .hero-left p {
-        color: var(--color-text-muted);
-        font-weight: bold;
-    }
-}
-
-/* Breakdown */
-.breakdown {
-    display: flex;
-    gap: 1.5rem;
-    justify-content: space-between;
-}
-
-.breakdown-item {
-    display: flex;
-    flex-direction: column;
-    flex: 1 1 0; /* the four cards share the row equally */
-    min-width: 0;
-    padding: 1.25rem;
-    align-items: flex-start;
-    background-color: var(--color-surface);
-    gap: 1.5rem;
-    border-radius: 1rem;
-}
-
-.item-title {
-    font-size: 1.125rem;
-    color: var(--color-text-soft);
-}
-
-.item-value {
-    font-size: 2rem;
-}
-
-@media (max-width: 37.5em) {
-    .container {
-        width: 90%;
-    }
-
-    .data {
-        flex-direction: column;
-    }
-
-    .breakdown {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 1rem;
-    }
-
-    .breakdown-item {
-        display: flex;
-        flex-direction: column;
-        padding: 1rem;
-        align-items: flex-start;
-        background-color: var(--color-surface);
-        width: 100%;
-        gap: 2rem;
-        border-radius: 1rem;
-    }
-
-    .item-title {
-        font-size: 1.5rem;
-        color: var(--color-text-soft);
-    }
-
-    .item-value {
-        font-size: 1.7rem;
-    }
-}
-
-/* Daily Forecast (Week) */
-.week {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-}
-
-.days {
-    display: flex;
-    justify-content: space-between;
-}
-
-.day {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    gap: 2rem;
-    background-color: var(--color-surface);
-    padding: 1rem 0.5rem;
-    border-radius: 0.5rem;
-}
-
-.min-max {
-    display: flex;
-    justify-content: space-between;
-    gap: 1.3rem;
-}
-
-@media (max-width: 37.5em) {
-    .days {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 1rem;
-    }
-
-    .day {
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        gap: 1.5rem;
-        background-color: var(--color-surface);
-        padding: 1rem 0.5rem;
-        border-radius: 0.5rem;
-    }
-
-    .min-max {
-        display: flex;
-        justify-content: space-between;
-        gap: 1rem;
-        font-size: 0.875rem;
-    }
-}
-
-/* Navbar */
-
-.logo-name-container {
     display: flex;
     align-items: center;
     gap: 0.5rem;
+    font-size: 1.25rem;
+    font-weight: 500;
 }
 
-.logo-image {
+.item-time img {
     width: 2.5rem;
-    height: 2.5rem;
 }
 
-.weather-app {
-    font-weight: bold;
-    font-size: 1.2rem;
+.item-temp {
+    font-size: 1rem;
+    font-weight: 500;
 }
 
-@media (max-width: 37.5em) {
-    .hourly-data {
-        padding-block-end: 1rem;
-        margin-block-end: 1rem;
-    }
-}
-
-/* Tablets and phones: stack the forecast and the hourly panel */
+/* ---------- Tablets and phones: stack the forecast and the hourly panel ---------- */
 @media (max-width: 64em) {
     .data {
         flex-direction: column;
@@ -500,134 +617,68 @@ body {
         max-height: 30rem;
     }
 }
-/* Units menu */
-.units {
-    position: relative;
-}
 
-.units-button {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.6rem 1rem;
-    background-color: var(--color-surface);
-    color: var(--color-text);
-    border: none;
-    border-radius: 0.5rem;
-    font-size: 0.95rem;
-    cursor: pointer;
-}
+/* ---------- Phones ---------- */
+@media (max-width: 37.5em) {
+    .container {
+        gap: 3rem;
+    }
 
-.units-button:hover,
-.units-button[aria-expanded="true"] {
-    background-color: var(--color-panel);
-}
+    .navbar {
+        padding-block-start: 1rem;
+    }
 
-.units-menu {
-    position: absolute;
-    inset-inline-end: 0;
-    inset-block-start: calc(100% + 0.5rem);
-    z-index: 20;
-    width: 13.75rem;
-    padding: 0.5rem;
-    background-color: var(--color-surface);
-    border: 1px solid var(--color-border);
-    border-radius: 0.75rem;
-    box-shadow: 0 10px 30px var(--shadow-color);
-}
+    .logo {
+        height: 1.75rem;
+    }
 
-.units-switch,
-.units-option {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    width: 100%;
-    padding: 0.5rem 0.6rem;
-    background: none;
-    color: var(--color-text);
-    border: none;
-    border-radius: 0.4rem;
-    font-size: 0.9rem;
-    text-align: start;
-    cursor: pointer;
-}
+    .units-button {
+        padding: 0.5rem 0.625rem;
+        font-size: 0.875rem;
+    }
 
-.units-switch:hover,
-.units-option:hover,
-.units-option.active {
-    background-color: var(--color-border);
-}
+    .main-content {
+        gap: 3rem;
+    }
 
-.units-group {
-    padding-block-start: 0.5rem;
-    margin-block-start: 0.5rem;
-    border-block-start: 1px solid var(--color-border);
-}
+    .body-container {
+        gap: 2rem;
+    }
 
-.units-group-title {
-    padding: 0 0.6rem 0.25rem;
-    font-size: 0.75rem;
-    color: var(--color-text-muted);
-}
+    .search {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
 
-/* Status messages */
-.status {
-    color: var(--color-text-soft);
-}
+    .hero {
+        flex-direction: column;
+        justify-content: center;
+        gap: 1rem;
+        padding: 2.5rem 1.5rem;
+        text-align: center;
+        background-image: url("./assets/images/bg-today-small.svg");
+    }
 
-.status.error {
-    color: var(--color-error);
-}
+    .hero-left {
+        align-items: center;
+    }
 
-.search-button:disabled {
-    opacity: 0.7;
-    cursor: wait;
-}
+    .hero-right {
+        justify-content: space-between;
+        width: 100%;
+    }
 
-/* Hero icon (emoji) */
-.day-icon {
-    font-size: 4.5rem;
-    line-height: 1;
-}
+    .breakdown {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+    }
 
-/* Place suggestions */
-.suggestions {
-    position: absolute;
-    inset-block-start: calc(100% + 0.4rem);
-    inset-inline-start: 0;
-    inset-inline-end: 0;
-    z-index: 30;
-    padding: 0.4rem;
-    list-style: none;
-    background-color: var(--color-surface);
-    border: 1px solid var(--color-border);
-    border-radius: 0.5rem;
-    box-shadow: 0 10px 30px var(--shadow-color);
-}
+    .days {
+        grid-template-columns: repeat(3, 1fr);
+    }
 
-.suggestion {
-    display: flex;
-    flex-direction: column;
-    gap: 0.15rem;
-    padding: 0.55rem 0.75rem;
-    border-radius: 0.4rem;
-    cursor: pointer;
-}
-
-.suggestion.active {
-    background-color: var(--color-border);
-}
-
-.suggestion-name {
-    font-weight: bold;
-}
-
-.suggestion-details,
-.suggestion-status {
-    font-size: 0.85rem;
-    color: var(--color-text-muted);
-}
-
-.suggestion-status {
-    padding: 0.55rem 0.75rem;
+    .hourly-data {
+        padding: 1.5rem 1rem;
+    }
 }

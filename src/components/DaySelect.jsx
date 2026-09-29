@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import { IoCheckmark, IoChevronDown } from "react-icons/io5";
+import checkIcon from "../assets/images/icon-checkmark.svg";
+import dropdownIcon from "../assets/images/icon-dropdown.svg";
 import { useDismiss } from "../hooks/useDismiss";
 import { dayName } from "../utils/formatDate";
 
@@ -77,7 +78,7 @@ export default function DaySelect({ days, value, onChange }) {
                 onKeyDown={handleButtonKeyDown}
             >
                 {dayName(value)}
-                <IoChevronDown aria-hidden="true" className={`day-select-chevron${open ? " open" : ""}`} />
+                <img src={dropdownIcon} alt="" className={`day-select-chevron${open ? " open" : ""}`} />
             </button>
 
             {open && (
@@ -103,7 +104,7 @@ export default function DaySelect({ days, value, onChange }) {
                                 onClick={() => select(day)}
                             >
                                 {dayName(day)}
-                                {selected && <IoCheckmark aria-hidden="true" />}
+                                {selected && <img src={checkIcon} alt="" />}
                             </li>
                         );
                     })}
