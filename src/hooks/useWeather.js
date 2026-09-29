@@ -8,30 +8,23 @@ export const useWeather = () => {
     const [units, setUnits] = useState(METRIC);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
-    const [lastCity, setLastCity] = useState("");
+    const [lastPlace, setLastPlace] = useState(null);
 
     // Id of the latest request, so an older, slower response can't overwrite a newer one
     const requestId = useRef(0);
 
-    // Returns true when the search succeeded
-    const search = async (city, searchUnits = units, keepDay = false) => {
-        if (!city.trim()) return false;
-
+    // Loads the weather for a place chosen in the search bar. Returns true on success
+    const search = async (place, searchUnits = units, keepDay = false) => {
         const id = ++requestId.current;
         setLoading(true);
         setError("");
 
         try {
-            const data = await fetchWeather(city, searchUnits);
+            const data = await fetchWeather(place, searchUnits);
             if (id !== requestId.current) return false;
 
-            if (!data) {
-                setError(`No results found for "${city}".`);
-                return false;
-            }
-
             setWeather(data);
-            setLastCity(city);
+            setLastPlace(place);
             if (!keepDay) setSelectedDay(data.daily[0].date);
             return true;
         } catch {
@@ -44,10 +37,10 @@ export const useWeather = () => {
         }
     };
 
-    // Save the new units and reload the current city with them
+    // Save the new units and reload the current place with them (no new city lookup needed)
     const changeUnits = (nextUnits) => {
         setUnits(nextUnits);
-        if (lastCity) search(lastCity, nextUnits, true);
+        if (lastPlace) search(lastPlace, nextUnits, true);
     };
 
     return { weather, search, selectedDay, setSelectedDay, units, changeUnits, loading, error };

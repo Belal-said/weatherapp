@@ -1,20 +1,29 @@
 import axios from "axios";
 import { METRIC } from "../utils/units";
 
-export const fetchWeather = async (city, units = METRIC) => {
-    // Get latitude and longitude of the given city
+// Find up to 5 places matching the text, e.g. "Paris" -> Paris (France), Paris (Texas), ...
+export const searchPlaces = async (query, signal) => {
     // encodeURIComponent keeps names with spaces or special characters URL-safe
     const geo = await axios.get(
-        `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=1`,
+        `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(query)}&count=5&language=en&format=json`,
+        { signal },
     );
 
-    // Validation statement
-    if (!geo.data.results) return null;
+    // No match: the response has no "results" field
+    return (geo.data.results ?? []).map((place) => ({
+        id: place.id,
+        name: place.name,
+        region: place.admin1,
+        country: place.country,
+        latitude: place.latitude,
+        longitude: place.longitude,
+    }));
+};
 
-    // Extract needed data from geo response
-    const { name, latitude, longitude, country } = geo.data.results[0];
+// Fetch the weather for a place returned by searchPlaces
+export const fetchWeather = async (place, units = METRIC) => {
+    const { name, country, latitude, longitude } = place;
 
-    // Fetch weather data with latitude and longitude
     const res = await axios.get(
         `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}` +
             `&current=apparent_temperature,relative_humidity_2m,wind_speed_10m,precipitation,is_day,temperature_2m,weather_code` +

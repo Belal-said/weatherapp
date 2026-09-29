@@ -42,7 +42,7 @@ All data comes from the free [Open-Meteo](https://open-meteo.com/) APIs, so the 
 
 | | Feature | Description |
 |---|---|---|
-| 🔍 | **City search** | Look up any city by name. Submit with **Enter** or the **Search** button. |
+| 🔍 | **Place search** | Suggestions appear as you type, with region and country, so cities that share a name ("Paris, France" or "Paris, Texas") are easy to tell apart. Works with the mouse or the keyboard. |
 | 🌡️ | **Current conditions** | City, country, local date, weather icon and current temperature. |
 | 📊 | **Weather details** | Feels-like temperature, humidity, wind speed and precipitation. |
 | 📅 | **7-day forecast** | Daily high and low temperatures with a condition icon for each day. |
@@ -93,8 +93,8 @@ The app runs at <http://localhost:5173>.
 
 ## Usage
 
-1. Type a city name, for example `Cairo`, `London` or `Tokyo`, in the search bar.
-2. Press **Enter** or click **Search**.
+1. Type a city name, for example `Cairo`, `London` or `Paris`, in the search bar. Up to 5 matching places appear below it.
+2. Click a place, or use **↑**/**↓** and press **Enter**. Pressing **Enter** or clicking **Search** without choosing picks the first (best) match. **Esc** closes the list.
 3. Read the current conditions, the detail cards and the 7-day forecast.
 4. Use the **Hourly Forecast** dropdown to view the 24-hour temperatures for any day of the week.
 5. Open **Units** in the top bar to switch between metric and imperial, or to change a single unit. The current city reloads in the new units, and the selected day stays the same.
@@ -110,7 +110,8 @@ src/
 ├── api/
 │   └── weather.js            # Open-Meteo requests and response mapping
 ├── hooks/
-│   └── useWeather.js         # Application state and search logic
+│   ├── useWeather.js         # Application state and weather loading
+│   └── usePlaceSearch.js     # Search-as-you-type place suggestions
 ├── utils/
 │   ├── getIcon.js            # WMO weather code → icon
 │   ├── formatDate.js         # Date and time formatting helpers
@@ -118,7 +119,7 @@ src/
 ├── components/
 │   ├── Container.jsx         # Layout wrapper
 │   ├── Navbar.jsx            # Branding and units control
-│   ├── SearchBar.jsx         # City search form
+│   ├── SearchBar.jsx         # Search box and suggestions list
 │   ├── DayData.jsx           # Current conditions hero card
 │   ├── Breakdown.jsx         # Weather detail cards
 │   ├── WeekDays.jsx          # 7-day forecast
@@ -145,25 +146,34 @@ This keeps components simple, and it means the data layer can be tested or reuse
 ### Data flow
 
 ```
- ┌─────────────┐   onSearch(city)   ┌──────────────┐   fetchWeather(city)   ┌──────────────────┐
- │  SearchBar  │ ─────────────────▶ │  useWeather  │ ─────────────────────▶ │  api/weather.js  │
- └─────────────┘                    └──────────────┘                        └────────┬─────────┘
-                                           ▲                                         │
-                                           │         { name, country,                │ 1. Geocoding API
-                                           │           current, daily, hourly }      │ 2. Forecast API
-                                           └─────────────────────────────────────────┘
-                                           │
-                                           ▼
+ typing ──▶ usePlaceSearch ──searchPlaces(text)──▶ Geocoding API
+                  │
+                  ▼  up to 5 places
+ ┌─────────────┐   onSearch(place)   ┌──────────────┐   fetchWeather(place)   ┌──────────────┐
+ │  SearchBar  │ ──────────────────▶ │  useWeather  │ ──────────────────────▶ │ Forecast API │
+ └─────────────┘                     └──────┬───────┘                         └──────────────┘
+                                            │ { name, country, current, daily, hourly }
+                                            ▼
                  ┌───────────┬───────────┬────────────┬──────────────────┐
                  │  DayData  │ Breakdown │  WeekDays  │  HourlyForecast  │
                  └───────────┴───────────┴────────────┴──────────────────┘
 ```
 
-1. `SearchBar` sends the city name to `useWeather().search`.
-2. `fetchWeather` gets the city's coordinates, then requests its forecast.
-3. The response is turned into arrays of objects that are easy to render.
+1. As the user types, `usePlaceSearch` waits 300 ms after the last keystroke, then asks the geocoding API for up to 5 matching places.
+2. The user picks one, and `SearchBar` passes that place, with its coordinates, to `useWeather().search`.
+3. `fetchWeather` requests the forecast for those coordinates and turns the response into arrays of objects that are easy to render.
 4. `useWeather` stores the result and sets the selected day to today.
 5. `App` passes each slice of the data to the component that displays it.
+
+### Place suggestions
+
+`usePlaceSearch(query)` powers the suggestions list:
+
+- It only searches once the text is at least 2 characters long.
+- It waits 300 ms after the last keystroke (debouncing), so typing "Alexandria" makes one request instead of ten.
+- When the text changes, it cancels the previous request with an `AbortController`.
+- It only returns results for the current text, so a slow response for older text is never shown.
+- `searchNow()` searches immediately. The Search button and Enter use it when they are pressed before the suggestions arrive.
 
 ### State
 
@@ -176,21 +186,21 @@ All shared state lives in the `useWeather` hook:
 | `units` | `object` | Current units, e.g. `{ temperature: "celsius", wind: "kmh", precipitation: "mm" }`. |
 | `loading` | `boolean` | `true` while a request is in progress. |
 | `error` | `string` | Message for the last failed search; empty when there is none. |
-| `lastCity` | `string` | The last city found, used to reload when the units change. |
+| `lastPlace` | `object \| null` | The last place loaded, with its coordinates, used to reload when the units change. |
 
-The search input's text is local state inside `SearchBar`, so typing re-renders only the search bar.
+The search text, the suggestions and the highlighted suggestion are local state inside `SearchBar`, so typing re-renders only the search bar.
 
-Each request gets an increasing id. When a response arrives, it is applied only if it belongs to the latest request, so a slow, older response can't overwrite newer results.
-
-### Changing units
-
-`changeUnits(next)` saves the new units and, if a city is loaded, runs `search(lastCity, next, true)`. The last argument keeps the selected day instead of resetting it to today. Open-Meteo converts the values on its side, so the app does no conversion math.
+Each weather request gets an increasing id. When a response arrives, it is applied only if it belongs to the latest request, so a slow, older response can't overwrite newer results.
 
 The hourly forecast is derived from state rather than stored separately. It is recalculated on each render:
 
 ```js
 const dayHours = hourly.filter((hour) => hour.time.startsWith(selectedDay));
 ```
+
+### Changing units
+
+`changeUnits(next)` saves the new units and, if a place is loaded, runs `search(lastPlace, next, true)`. Because `lastPlace` already has the coordinates, only the forecast is requested again; there is no new city lookup. The last argument keeps the selected day instead of resetting it to today. Open-Meteo converts the values on its side, so the app does no conversion math.
 
 ---
 
@@ -200,18 +210,19 @@ Both endpoints are free and need no authentication.
 
 ### 1. Geocoding
 
-Turns a city name into coordinates.
+Turns the typed text into matching places. Called by `searchPlaces(query)`.
 
 ```http
-GET https://geocoding-api.open-meteo.com/v1/search?name={city}&count=1
+GET https://geocoding-api.open-meteo.com/v1/search?name={query}&count=5&language=en&format=json
 ```
 
 | Parameter | Value | Description |
 |---|---|---|
-| `name` | `encodeURIComponent(city)` | City name, made safe for use in a URL |
-| `count` | `1` | Return only the best match |
+| `name` | `encodeURIComponent(query)` | The typed text, made safe for use in a URL |
+| `count` | `5` | Return up to 5 matches, best first |
+| `language` | `en` | Return place names in English |
 
-The app uses `name`, `country`, `latitude` and `longitude` from `results[0]`. If no city matches, the response has no `results` field and `fetchWeather` returns `null`.
+Each result is mapped to `{ id, name, region, country, latitude, longitude }`, where `region` is the API's `admin1` field, such as a state or province. If nothing matches, the response has no `results` field, and `searchPlaces` returns an empty array.
 
 ### 2. Forecast
 
@@ -261,7 +272,7 @@ Open-Meteo returns each section as a set of parallel arrays:
 
 ## Data model
 
-`fetchWeather(city, units?)` resolves to `null` when the city isn't found, or to the object below. `units` defaults to metric, and every value comes back in the requested units.
+`fetchWeather(place, units?)` takes a place from `searchPlaces` and resolves to the object below. `units` defaults to metric, and every value comes back in the requested units.
 
 ```ts
 {
@@ -302,7 +313,7 @@ Open-Meteo returns each section as a set of parallel arrays:
 |---|---|---|
 | `Container` | `children` | Page layout wrapper |
 | `Navbar` | `units`, `onUnitsChange` | Logo, app name and the Units menu (closes on outside click or Escape) |
-| `SearchBar` | `onSearch: (city) => Promise<boolean>`, `loading` | Search form. Enter and the button both submit; the input clears only after a successful search |
+| `SearchBar` | `onSearch: (place) => Promise<boolean>`, `loading` | Search box with a suggestions list (an accessible combobox). Supports mouse, **↑**/**↓**, **Enter** and **Esc**; the input clears only after the weather loads |
 | `DayData` | `current`, `name`, `country` | Current conditions hero card |
 | `Breakdown` | `current`, `units` | Feels like, humidity, wind and precipitation cards, with unit labels |
 | `WeekDays` | `daily` | 7-day forecast cards |
@@ -313,13 +324,24 @@ Open-Meteo returns each section as a set of parallel arrays:
 | Returns | Type | Description |
 |---|---|---|
 | `weather` | `object \| null` | See [Data model](#data-model) |
-| `search` | `(city, units?, keepDay?) => Promise<boolean>` | Fetches the weather for a city. Resolves `true` on success. Blank input is ignored. |
+| `search` | `(place, units?, keepDay?) => Promise<boolean>` | Fetches the weather for a chosen place. Resolves `true` on success. |
 | `selectedDay` | `string` | Date shown in the hourly forecast |
 | `setSelectedDay` | `(date: string) => void` | Changes the selected day |
 | `units` | `object` | Current units |
-| `changeUnits` | `(units) => void` | Saves new units and reloads the current city |
+| `changeUnits` | `(units) => void` | Saves new units and reloads the current place |
 | `loading` | `boolean` | `true` while a request is in progress |
 | `error` | `string` | Last error message, or `""` |
+
+### Hook: `usePlaceSearch(query)`
+
+| Returns | Type | Description |
+|---|---|---|
+| `places` | `Array<Place>` | Up to 5 matches for the current text. Empty while searching or when the text is shorter than 2 characters |
+| `searching` | `boolean` | `true` while waiting for results for the current text |
+| `failed` | `boolean` | `true` when the last search failed, e.g. no connection |
+| `searchNow` | `() => Promise<Array<Place>>` | Returns the current results, or searches immediately if they aren't ready yet |
+
+A `Place` is `{ id, name, region, country, latitude, longitude }`.
 
 ### Utilities
 
@@ -357,19 +379,16 @@ Open-Meteo returns each section as a set of parallel arrays:
 
 **Performance**
 
-- Changing units repeats both requests, including the geocoding lookup, even though the city's coordinates haven't changed.
-- Nothing is cached, so searching the same city again makes two new requests.
-- Superseded requests are ignored but not cancelled, so they still finish downloading.
+- Nothing is cached, so loading the same place again, or switching units back and forth, requests the forecast again.
+- Superseded weather requests are ignored but not cancelled, so they still finish downloading. (Place suggestion requests are cancelled.)
 
 **Behaviour**
 
-- Geocoding always takes the first match, so ambiguous names such as "Paris" may pick the wrong city.
-- Units and the last city aren't saved, so a page reload resets them.
+- Units and the last place aren't saved, so a page reload resets them.
 - Emoji icons look different on each operating system and don't match the design's illustrated icons.
 
 **Layout and accessibility**
 
-- `.data` and `.hourly-div` both use `height: 100vh`, so the hourly panel can overflow the page, and the layout depends on the screen height.
 - There is only one breakpoint (600px), so tablet widths get the desktop layout.
 - `scrollbar-width: none` on every element hides scrollbars, including in scrollable areas such as the hourly list.
 - Headings skip levels (`h1` → `h2` → `h4`), and "Daily Forecast" is plain text rather than a heading.
@@ -382,8 +401,10 @@ Open-Meteo returns each section as a set of parallel arrays:
 
 - [x] Loading and error states
 - [x] Metric / imperial unit switching
-- [ ] Reuse coordinates and cache results when the units change
-- [ ] Choose between cities with the same name
+- [x] Choose between cities with the same name
+- [x] Reuse coordinates when the units change
+- [x] Fix the layout overflow caused by fixed `100vh` heights
+- [ ] Cache forecast results
 - [ ] Detect the user's location on first visit
 - [ ] Remember the last searched city
 - [ ] Responsive layout for mobile

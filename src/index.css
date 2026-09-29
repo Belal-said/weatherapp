@@ -60,6 +60,7 @@ body {
 }
 
 .input-div {
+    position: relative; /* anchors the suggestions list */
     display: flex;
     height: 40px;
     width: 100%;
@@ -481,4 +482,46 @@ body {
 .day-icon {
     font-size: 72px;
     line-height: 1;
+}
+
+/* Place suggestions */
+.suggestions {
+    position: absolute;
+    top: calc(100% + 0.4rem);
+    left: 0;
+    right: 0;
+    z-index: 30;
+    padding: 0.4rem;
+    list-style: none;
+    background-color: #262840;
+    border: 1px solid #3a3b55;
+    border-radius: 0.5rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+}
+
+.suggestion {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    padding: 0.55rem 0.75rem;
+    border-radius: 0.4rem;
+    cursor: pointer;
+}
+
+.suggestion.active {
+    background-color: #3a3b55;
+}
+
+.suggestion-name {
+    font-weight: bold;
+}
+
+.suggestion-details,
+.suggestion-status {
+    font-size: 0.85rem;
+    color: rgb(173, 172, 172);
+}
+
+.suggestion-status {
+    padding: 0.55rem 0.75rem;
 }
