@@ -19,8 +19,10 @@ export const usePlaceSearch = (query) => {
             try {
                 const places = await searchPlaces(text, controller.signal);
                 setFound({ query: text, places, failed: false });
-            } catch {
-                if (!controller.signal.aborted) setFound({ query: text, places: [], failed: true });
+            } catch (err) {
+                if (controller.signal.aborted) return; // cancelled on purpose, not a failure
+                console.error("Failed to search for places:", err);
+                setFound({ query: text, places: [], failed: true });
             }
         }, DELAY);
 

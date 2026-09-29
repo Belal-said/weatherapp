@@ -49,6 +49,7 @@ All data comes from the free [Open-Meteo](https://open-meteo.com/) APIs, so the 
 | 🕐 | **Hourly forecast** | 24 hourly temperatures with day/night icons, for any of the next 7 days. |
 | ⚙️ | **Units** | Switch between metric and imperial in one click, or set temperature, wind speed and precipitation units individually. |
 | 🌍 | **Local time** | Every time shown is in the searched city's own timezone. |
+| ⚡ | **Caching** | Forecasts and place searches are cached in `localStorage`, so repeat lookups load instantly, even after a page reload. |
 | 💬 | **Feedback** | Loading indicator, plus clear messages when a city isn't found or the network fails. |
 
 ## Tech stack
@@ -111,11 +112,13 @@ src/
 │   └── weather.js            # Open-Meteo requests and response mapping
 ├── hooks/
 │   ├── useWeather.js         # Application state and weather loading
-│   └── usePlaceSearch.js     # Search-as-you-type place suggestions
+│   ├── usePlaceSearch.js     # Search-as-you-type place suggestions
+│   └── useDismiss.js         # Closes menus on outside click or Escape
 ├── utils/
 │   ├── getIcon.js            # WMO weather code → icon
 │   ├── formatDate.js         # Date and time formatting helpers
-│   └── units.js              # Unit systems, menu options and labels
+│   ├── units.js              # Unit systems, menu options and labels
+│   └── storage.js            # localStorage cache with expiry
 ├── components/
 │   ├── Container.jsx         # Layout wrapper
 │   ├── Navbar.jsx            # Branding and units control
@@ -123,7 +126,8 @@ src/
 │   ├── DayData.jsx           # Current conditions hero card
 │   ├── Breakdown.jsx         # Weather detail cards
 │   ├── WeekDays.jsx          # 7-day forecast
-│   └── HourlyForecast.jsx    # Day selector and hourly temperatures
+│   ├── HourlyForecast.jsx    # Hourly temperatures for the selected day
+│   └── DaySelect.jsx         # Day dropdown in the Hourly Forecast header
 ├── images/                   # Static images (logo)
 ├── App.jsx                   # Root component and page layout
 ├── main.jsx                  # Application entry point
@@ -201,6 +205,26 @@ const dayHours = hourly.filter((hour) => hour.time.startsWith(selectedDay));
 ### Changing units
 
 `changeUnits(next)` saves the new units and, if a place is loaded, runs `search(lastPlace, next, true)`. Because `lastPlace` already has the coordinates, only the forecast is requested again; there is no new city lookup. The last argument keeps the selected day instead of resetting it to today. Open-Meteo converts the values on its side, so the app does no conversion math.
+
+### Caching
+
+`api/weather.js` checks a `localStorage` cache (`utils/storage.js`) before making a request, and saves every response it receives:
+
+| Data | Cache key | Kept for |
+|---|---|---|
+| Place suggestions | `weather-app:places:{text}` | 7 days, since names and coordinates rarely change |
+| Forecast | `weather-app:weather:{lat},{lon}:{units}` | 15 minutes, so the weather stays fresh |
+
+- Forecasts are cached per place **and** unit combination. Switching units back and forth, or loading the same place again, makes no requests while the entry is valid.
+- Each entry stores its save and expiry times. An expired entry is deleted when it's read, and the forecast is requested again.
+- The cache holds at most 30 entries (a forecast is about 10 KB). The oldest entries are removed first, and only this app's `weather-app:` keys are ever touched.
+- If storage is full, the app clears its own cache and tries once more. If storage is blocked, for example in some private windows, the app keeps working without a cache.
+
+To clear the cache manually, run this in the browser console:
+
+```js
+Object.keys(localStorage).filter((k) => k.startsWith("weather-app:")).forEach((k) => localStorage.removeItem(k));
+```
 
 ---
 
@@ -317,7 +341,8 @@ Open-Meteo returns each section as a set of parallel arrays:
 | `DayData` | `current`, `name`, `country` | Current conditions hero card |
 | `Breakdown` | `current`, `units` | Feels like, humidity, wind and precipitation cards, with unit labels |
 | `WeekDays` | `daily` | 7-day forecast cards |
-| `HourlyForecast` | `hourly`, `daily`, `selectedDay`, `onDayChange` | Day selector and that day's 24 hourly temperatures |
+| `HourlyForecast` | `hourly`, `daily`, `selectedDay`, `onDayChange` | Day dropdown and that day's 24 hourly temperatures |
+| `DaySelect` | `days`, `value`, `onChange` | Custom dropdown (an accessible listbox) styled to match the design. Supports mouse, **↑**/**↓**, **Home**/**End**, **Enter**/**Space** and **Esc**; closes on outside click |
 
 ### Hook: `useWeather()`
 
@@ -379,7 +404,6 @@ A `Place` is `{ id, name, region, country, latitude, longitude }`.
 
 **Performance**
 
-- Nothing is cached, so loading the same place again, or switching units back and forth, requests the forecast again.
 - Superseded weather requests are ignored but not cancelled, so they still finish downloading. (Place suggestion requests are cancelled.)
 
 **Behaviour**
@@ -389,7 +413,6 @@ A `Place` is `{ id, name, region, country, latitude, longitude }`.
 
 **Layout and accessibility**
 
-- There is only one breakpoint (600px), so tablet widths get the desktop layout.
 - `scrollbar-width: none` on every element hides scrollbars, including in scrollable areas such as the hourly list.
 - Headings skip levels (`h1` → `h2` → `h4`), and "Daily Forecast" is plain text rather than a heading.
 
@@ -404,10 +427,10 @@ A `Place` is `{ id, name, region, country, latitude, longitude }`.
 - [x] Choose between cities with the same name
 - [x] Reuse coordinates when the units change
 - [x] Fix the layout overflow caused by fixed `100vh` heights
-- [ ] Cache forecast results
+- [x] Cache forecast and place results in `localStorage`
 - [ ] Detect the user's location on first visit
 - [ ] Remember the last searched city
-- [ ] Responsive layout for mobile
+- [x] Tablet breakpoint (1024px): the hourly panel stacks below the forecast
 - [ ] Unit tests for `api/` and `utils/`
 
 ## Contributing

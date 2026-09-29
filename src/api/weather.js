@@ -1,8 +1,17 @@
 import axios from "axios";
 import { METRIC } from "../utils/units";
+import { DAY, MINUTE, getCached, setCached } from "../utils/storage";
+
+// How long cached responses stay valid
+const PLACES_TTL = 7 * DAY; // city names and coordinates rarely change
+const WEATHER_TTL = 15 * MINUTE; // keeps the forecast reasonably fresh
 
 // Find up to 5 places matching the text, e.g. "Paris" -> Paris (France), Paris (Texas), ...
 export const searchPlaces = async (query, signal) => {
+    const cacheKey = `places:${query.trim().toLowerCase()}`;
+    const cached = getCached(cacheKey);
+    if (cached) return cached;
+
     // encodeURIComponent keeps names with spaces or special characters URL-safe
     const geo = await axios.get(
         `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(query)}&count=5&language=en&format=json`,
@@ -10,7 +19,7 @@ export const searchPlaces = async (query, signal) => {
     );
 
     // No match: the response has no "results" field
-    return (geo.data.results ?? []).map((place) => ({
+    const places = (geo.data.results ?? []).map((place) => ({
         id: place.id,
         name: place.name,
         region: place.admin1,
@@ -18,11 +27,21 @@ export const searchPlaces = async (query, signal) => {
         latitude: place.latitude,
         longitude: place.longitude,
     }));
+
+    setCached(cacheKey, places, PLACES_TTL);
+    return places;
 };
 
 // Fetch the weather for a place returned by searchPlaces
 export const fetchWeather = async (place, units = METRIC) => {
     const { name, country, latitude, longitude } = place;
+
+    // One entry per place and unit combination
+    const cacheKey =
+        `weather:${latitude.toFixed(2)},${longitude.toFixed(2)}:` +
+        `${units.temperature}-${units.wind}-${units.precipitation}`;
+    const cached = getCached(cacheKey);
+    if (cached) return cached;
 
     const res = await axios.get(
         `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}` +
@@ -37,7 +56,7 @@ export const fetchWeather = async (place, units = METRIC) => {
 
     const { current: c, hourly: h, daily: d } = res.data;
 
-    return {
+    const weather = {
         name,
         country,
         current: {
@@ -63,4 +82,7 @@ export const fetchWeather = async (place, units = METRIC) => {
             isDay: h.is_day[index],
         })),
     };
+
+    setCached(cacheKey, weather, WEATHER_TTL);
+    return weather;
 };

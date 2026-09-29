@@ -1,6 +1,7 @@
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { IoCheckmark, IoChevronDown, IoSettingsOutline } from "react-icons/io5";
 import logo from "../images/image.png";
+import { useDismiss } from "../hooks/useDismiss";
 import { IMPERIAL, METRIC, UNIT_OPTIONS, isMetric } from "../utils/units";
 
 export default function Navbar({ units, onUnitsChange }) {
@@ -9,23 +10,7 @@ export default function Navbar({ units, onUnitsChange }) {
     const metric = isMetric(units);
 
     // Close the menu when clicking outside it or pressing Escape
-    useEffect(() => {
-        if (!open) return;
-
-        const handleClick = (e) => {
-            if (!menuRef.current.contains(e.target)) setOpen(false);
-        };
-        const handleKey = (e) => {
-            if (e.key === "Escape") setOpen(false);
-        };
-
-        document.addEventListener("mousedown", handleClick);
-        document.addEventListener("keydown", handleKey);
-        return () => {
-            document.removeEventListener("mousedown", handleClick);
-            document.removeEventListener("keydown", handleKey);
-        };
-    }, [open]);
+    useDismiss(menuRef, open, () => setOpen(false));
 
     return (
         <div className="navbar">

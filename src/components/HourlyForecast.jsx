@@ -1,5 +1,6 @@
 import { getIcon } from "../utils/getIcon";
-import { dayName, hourLabel } from "../utils/formatDate";
+import { hourLabel } from "../utils/formatDate";
+import DaySelect from "./DaySelect";
 
 const HourlyForecast = ({ hourly, daily, selectedDay, onDayChange }) => {
     const dayHours = hourly.filter((hour) => hour.time.startsWith(selectedDay));
@@ -8,18 +9,7 @@ const HourlyForecast = ({ hourly, daily, selectedDay, onDayChange }) => {
         <div className="hourly-data">
             <div className="hourly-data-header">
                 <h4>Hourly Forecast</h4>
-                <select
-                    className="day-selector"
-                    aria-label="Select a day"
-                    value={selectedDay}
-                    onChange={(event) => onDayChange(event.target.value)}
-                >
-                    {daily.map((day) => (
-                        <option key={day.date} value={day.date}>
-                            {dayName(day.date, "long")}
-                        </option>
-                    ))}
-                </select>
+                <DaySelect days={daily.map((day) => day.date)} value={selectedDay} onChange={onDayChange} />
             </div>
             <div className="hourly-div">
                 {dayHours.map((item) => (

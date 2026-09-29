@@ -2,6 +2,20 @@ import { useRef, useState } from "react";
 import { fetchWeather } from "../api/weather";
 import { METRIC } from "../utils/units";
 
+// Turn an error into a message that says what actually went wrong
+const errorMessage = (err) => {
+    // The server answered with an error status
+    if (err.response) {
+        const reason = err.response.data?.reason;
+        if (err.response.status === 429) return "Too many requests to the weather service. Wait a minute and try again.";
+        return `The weather service returned an error (${err.response.status})${reason ? `: ${reason}` : ""}.`;
+    }
+    // The request was sent but nothing came back (offline, blocked, or timed out)
+    if (err.request) return "Couldn't reach the weather service. Check your connection and try again.";
+    // A bug in the app itself
+    return "Something went wrong while showing the weather. Details are in the browser console.";
+};
+
 export const useWeather = () => {
     const [weather, setWeather] = useState(null);
     const [selectedDay, setSelectedDay] = useState("");
@@ -27,10 +41,10 @@ export const useWeather = () => {
             setLastPlace(place);
             if (!keepDay) setSelectedDay(data.daily[0].date);
             return true;
-        } catch {
-            if (id === requestId.current) {
-                setError("Couldn't load the weather. Check your connection and try again.");
-            }
+        } catch (err) {
+            // Keep the real cause in the console so failures can be debugged
+            console.error("Failed to load the weather:", err);
+            if (id === requestId.current) setError(errorMessage(err));
             return false;
         } finally {
             if (id === requestId.current) setLoading(false);
