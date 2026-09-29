@@ -13,7 +13,8 @@ export default function Navbar({ units, onUnitsChange }) {
     useDismiss(menuRef, open, () => setOpen(false));
 
     return (
-        <div className="navbar">
+        // <header> is the page's banner landmark
+        <header className="navbar">
             <div className="logo-name-container">
                 <img src={logo} className="logo-image" alt="" />
                 <p className="weather-app">Weather App</p>
@@ -65,6 +66,6 @@ export default function Navbar({ units, onUnitsChange }) {
                     </div>
                 )}
             </div>
-        </div>
+        </header>
     );
 }

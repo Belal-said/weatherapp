@@ -22,6 +22,15 @@ body {
     gap: 4rem;
 }
 
+/* Main landmark: holds the heading and everything below the header */
+.main-content {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4rem;
+}
+
 .body-container {
     display: flex;
     flex-direction: column;

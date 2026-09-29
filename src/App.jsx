@@ -16,33 +16,37 @@ function App() {
     return (
         <Container>
             <Navbar units={units} onUnitsChange={changeUnits} />
-            <h1>How's the sky looking today?</h1>
-            <div className="body-container">
-                <SearchBar onSearch={search} loading={loading} />
 
-                {error && (
-                    <p className="status error" role="alert">
-                        {error}
-                    </p>
-                )}
-                {loading && !weather && <p className="status">Loading...</p>}
+            {/* <main> is the page's main landmark: everything below the header */}
+            <main className="main-content">
+                <h1>How's the sky looking today?</h1>
+                <div className="body-container">
+                    <SearchBar onSearch={search} loading={loading} />
 
-                {weather && (
-                    <div className="data">
-                        <div className="main-data">
-                            <DayData current={weather.current} country={weather.country} name={weather.name} />
-                            <Breakdown current={weather.current} units={units} />
-                            <WeekDays daily={weather.daily} />
+                    {error && (
+                        <p className="status error" role="alert">
+                            {error}
+                        </p>
+                    )}
+                    {loading && !weather && <p className="status">Loading...</p>}
+
+                    {weather && (
+                        <div className="data">
+                            <div className="main-data">
+                                <DayData current={weather.current} country={weather.country} name={weather.name} />
+                                <Breakdown current={weather.current} units={units} />
+                                <WeekDays daily={weather.daily} />
+                            </div>
+                            <HourlyForecast
+                                hourly={weather.hourly}
+                                daily={weather.daily}
+                                selectedDay={selectedDay}
+                                onDayChange={setSelectedDay}
+                            />
                         </div>
-                        <HourlyForecast
-                            hourly={weather.hourly}
-                            daily={weather.daily}
-                            selectedDay={selectedDay}
-                            onDayChange={setSelectedDay}
-                        />
-                    </div>
-                )}
-            </div>
+                    )}
+                </div>
+            </main>
         </Container>
     );
 }
