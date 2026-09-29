@@ -524,12 +524,6 @@ h1 {
     box-shadow: 0 0.5rem 1rem var(--shadow-color);
 }
 
-.day-select-button:focus-visible,
-.day-select-menu:focus-visible {
-    outline: 2px solid var(--neutral-0);
-    outline-offset: 2px;
-}
-
 .day-select-option {
     display: flex;
     justify-content: space-between;
@@ -588,6 +582,39 @@ h1 {
 .item-temp {
     font-size: 1rem;
     font-weight: 500;
+}
+
+/* ---------- Hover and focus states (from the design) ---------- */
+
+/* Keyboard focus: a white ring with a small gap, on every focusable element */
+:focus-visible {
+    outline: 2px solid var(--neutral-0);
+    outline-offset: 3px;
+}
+
+/* The search box shows the ring on its wrapper, around the icon and the input */
+.input-div:has(.search-input:focus-visible) {
+    outline: 2px solid var(--neutral-0);
+    outline-offset: 3px;
+}
+
+.search-button:focus-visible {
+    outline-color: var(--blue-500);
+}
+
+/* Items inside menus get a thin border instead of a ring */
+.units-switch:focus-visible,
+.units-option:focus-visible {
+    outline: 1px solid var(--neutral-0);
+    outline-offset: -1px;
+}
+
+.input-div:hover {
+    background-color: var(--neutral-700);
+}
+
+.search-button:not(:disabled):hover {
+    background-color: var(--blue-700);
 }
 
 /* ---------- Tablets and phones: stack the forecast and the hourly panel ---------- */

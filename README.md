@@ -50,6 +50,7 @@ All data comes from the free [Open-Meteo](https://open-meteo.com/) APIs, so the 
 | ⚙️ | **Units** | Switch between metric and imperial in one click, or set temperature, wind speed and precipitation units individually. |
 | 🌍 | **Local time** | Every time shown is in the searched city's own timezone. |
 | ⚡ | **Caching** | Forecasts and place searches are cached in `localStorage`, so repeat lookups load instantly, even after a page reload. |
+| ♿ | **Keyboard friendly** | Every control works with the keyboard. Focus shows the design's ring (white, or blue on the Search button) using `:focus-visible`, so it appears for keyboard users but not on mouse clicks. |
 | 💬 | **UI states** | Loading skeleton, "Search in progress", "No search result found!", and an API error page with a working **Retry** button, all matching the design. |
 
 ## Tech stack
