@@ -1,6 +1,8 @@
 import { getWeatherIcon } from "../utils/weatherIcon";
 import { dayName } from "../utils/formatDate";
 
+const SKELETON_DAYS = 7;
+
 export default function WeekDays({ daily }) {
     return (
         <section className="week" aria-labelledby="daily-title">
@@ -8,7 +10,13 @@ export default function WeekDays({ daily }) {
                 Daily forecast
             </h3>
             <div className="days">
-                {daily.map((day) => {
+                {/* Loading: empty cards, like the design */}
+                {!daily &&
+                    Array.from({ length: SKELETON_DAYS }, (_, index) => (
+                        <div className="day skeleton" key={index} aria-hidden="true" />
+                    ))}
+
+                {daily?.map((day) => {
                     const icon = getWeatherIcon(day.code);
                     return (
                         <div className="day" key={day.date}>

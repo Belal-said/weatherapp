@@ -1,18 +1,20 @@
 import { useState } from "react";
 import searchIcon from "../assets/images/icon-search.svg";
+import loadingIcon from "../assets/images/icon-loading.svg";
 import { usePlaceSearch } from "../hooks/usePlaceSearch";
 
 // "Île-de-France, France"
 const placeDetails = (place) => [place.region, place.country].filter(Boolean).join(", ");
 
-const SearchBar = ({ onSearch, loading }) => {
+const SearchBar = ({ onSearch, onNotFound, onError, loading }) => {
     const [query, setQuery] = useState("");
     const [open, setOpen] = useState(false);
     const [active, setActive] = useState(0);
-    const { places, searching, failed, searchNow } = usePlaceSearch(query);
+    const { places, searching, searchNow } = usePlaceSearch(query);
 
     const current = Math.min(active, places.length - 1);
-    const showList = open && query.trim().length >= 2;
+    // The list only shows while searching or when there are places to pick
+    const showList = open && query.trim().length >= 2 && (searching || places.length > 0);
 
     const choose = async (place) => {
         setOpen(false);
@@ -27,10 +29,16 @@ const SearchBar = ({ onSearch, loading }) => {
 
         try {
             const results = await searchNow();
-            if (results.length) choose(results[Math.max(current, 0)]);
-            else setOpen(true);
-        } catch {
-            setOpen(true);
+            if (results.length) {
+                choose(results[Math.max(current, 0)]);
+            } else {
+                setOpen(false);
+                onNotFound(); // "No search result found!"
+            }
+        } catch (err) {
+            console.error("Failed to search for places:", err);
+            setOpen(false);
+            onError(query); // API error page, whose Retry repeats this search
         }
     };
 
@@ -75,10 +83,11 @@ const SearchBar = ({ onSearch, loading }) => {
 
                 {showList && (
                     <ul className="suggestions" id="place-list" role="listbox">
-                        {searching && <li className="suggestion-status">Searching...</li>}
-                        {failed && <li className="suggestion-status">Couldn’t search for places. Try again.</li>}
-                        {!searching && !failed && places.length === 0 && (
-                            <li className="suggestion-status">No places found for “{query.trim()}”.</li>
+                        {searching && (
+                            <li className="suggestion-status">
+                                <img className="spin" src={loadingIcon} alt="" />
+                                Search in progress
+                            </li>
                         )}
                         {places.map((place, index) => (
                             <li
@@ -100,7 +109,7 @@ const SearchBar = ({ onSearch, loading }) => {
                 )}
             </div>
             <button type="submit" className="search-button" disabled={loading}>
-                {loading ? "Loading..." : "Search"}
+                Search
             </button>
         </form>
     );

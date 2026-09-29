@@ -5,7 +5,7 @@ import { useDismiss } from "../hooks/useDismiss";
 import { dayName } from "../utils/formatDate";
 
 // Custom dropdown for choosing a day, styled to match the design (a native <select> can't be)
-export default function DaySelect({ days, value, onChange }) {
+export default function DaySelect({ days, value, onChange, disabled = false }) {
     const [open, setOpen] = useState(false);
     const [active, setActive] = useState(0);
     const rootRef = useRef(null);
@@ -64,6 +64,18 @@ export default function DaySelect({ days, value, onChange }) {
             setOpen(false);
         }
     };
+
+    // Loading: a placeholder button, like the design's "–"
+    if (disabled) {
+        return (
+            <div className="day-select">
+                <button type="button" className="day-select-button" disabled aria-label="Day: loading">
+                    –
+                    <img src={dropdownIcon} alt="" className="day-select-chevron" />
+                </button>
+            </div>
+        );
+    }
 
     return (
         <div className="day-select" ref={rootRef}>

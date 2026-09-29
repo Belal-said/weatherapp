@@ -50,7 +50,7 @@ All data comes from the free [Open-Meteo](https://open-meteo.com/) APIs, so the 
 | ⚙️ | **Units** | Switch between metric and imperial in one click, or set temperature, wind speed and precipitation units individually. |
 | 🌍 | **Local time** | Every time shown is in the searched city's own timezone. |
 | ⚡ | **Caching** | Forecasts and place searches are cached in `localStorage`, so repeat lookups load instantly, even after a page reload. |
-| 💬 | **Feedback** | Loading indicator, plus clear messages when a city isn't found or the network fails. |
+| 💬 | **UI states** | Loading skeleton, "Search in progress", "No search result found!", and an API error page with a working **Retry** button, all matching the design. |
 
 ## Tech stack
 
@@ -124,6 +124,7 @@ src/
 │   ├── Navbar.jsx            # Branding and units control
 │   ├── SearchBar.jsx         # Search box and suggestions list
 │   ├── DayData.jsx           # Current conditions hero card
+│   ├── ErrorState.jsx        # API error page with Retry
 │   ├── Breakdown.jsx         # Weather detail cards
 │   ├── WeekDays.jsx          # 7-day forecast
 │   ├── HourlyForecast.jsx    # Hourly temperatures for the selected day
@@ -190,8 +191,9 @@ All shared state lives in the `useWeather` hook:
 | `weather` | `object \| null` | The latest forecast. `null` until the first successful search. |
 | `selectedDay` | `string` | The date shown in the hourly forecast, e.g. `"2026-09-29"`. |
 | `units` | `object` | Current units, e.g. `{ temperature: "celsius", wind: "kmh", precipitation: "mm" }`. |
-| `loading` | `boolean` | `true` while a request is in progress. |
-| `error` | `string` | Message for the last failed search; empty when there is none. |
+| `loading` | `false \| "new" \| "refresh"` | `"new"` while loading a different place (shows the skeleton), `"refresh"` while reloading the same place, e.g. after a unit change (keeps the data on screen). |
+| `notFound` | `boolean` | `true` after a search with no matching place. |
+| `error` | `null \| { retry }` | Set when a request fails; `retry()` repeats exactly the request that failed. |
 | `lastPlace` | `object \| null` | The last place loaded, with its coordinates, used to reload when the units change. |
 
 The search text, the suggestions and the highlighted suggestion are local state inside `SearchBar`, so typing re-renders only the search bar.
@@ -203,6 +205,19 @@ The hourly forecast is derived from state rather than stored separately. It is r
 ```js
 const dayHours = hourly.filter((hour) => hour.time.startsWith(selectedDay));
 ```
+
+### UI states
+
+`App` decides what to show below the header:
+
+| State | Shown when | What appears |
+|---|---|---|
+| API error | `error` is set | `ErrorState` replaces the heading, search and weather; **Retry** calls `error.retry()` |
+| No results | `notFound` | "No search result found!" under the search bar |
+| Loading | `loading === "new"` | The weather components with no data, which render as skeletons (`Loading…`, `–`, empty cards) |
+| Weather | data loaded | The full dashboard |
+
+Failures are still logged to the browser console with the full error, so the real cause can be debugged.
 
 ### Changing units
 
@@ -339,7 +354,7 @@ Open-Meteo returns each section as a set of parallel arrays:
 |---|---|---|
 | `Container` | `children` | Page layout wrapper |
 | `Navbar` | `units`, `onUnitsChange` | Logo, app name and the Units menu (closes on outside click or Escape) |
-| `SearchBar` | `onSearch: (place) => Promise<boolean>`, `loading` | Search box with a suggestions list (an accessible combobox). Supports mouse, **↑**/**↓**, **Enter** and **Esc**; the input clears only after the weather loads |
+| `SearchBar` | `onSearch: (place) => Promise<boolean>`, `onNotFound`, `onError: (query) => void`, `loading` | Search box with a suggestions list (an accessible combobox). Supports mouse, **↑**/**↓**, **Enter** and **Esc**; the input clears only after the weather loads |
 | `DayData` | `current`, `name`, `country` | Current conditions hero card |
 | `Breakdown` | `current`, `units` | Feels like, humidity, wind and precipitation cards, with unit labels |
 | `WeekDays` | `daily` | 7-day forecast cards |
@@ -356,8 +371,9 @@ Open-Meteo returns each section as a set of parallel arrays:
 | `setSelectedDay` | `(date: string) => void` | Changes the selected day |
 | `units` | `object` | Current units |
 | `changeUnits` | `(units) => void` | Saves new units and reloads the current place |
-| `loading` | `boolean` | `true` while a request is in progress |
-| `error` | `string` | Last error message, or `""` |
+| `loading` | `false \| "new" \| "refresh"` | What is loading, see [State](#state) |
+| `notFound` / `reportNotFound` | `boolean` / `() => void` | The "No search result found!" state |
+| `error` / `reportSearchError` | `null \| { retry }` / `(query) => void` | The API error page and its Retry action |
 
 ### Hook: `usePlaceSearch(query)`
 

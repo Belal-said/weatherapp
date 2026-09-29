@@ -1,27 +1,16 @@
 import { useRef, useState } from "react";
-import { fetchWeather } from "../api/weather";
+import { fetchWeather, searchPlaces } from "../api/weather";
 import { METRIC } from "../utils/units";
-
-// Turn an error into a message that says what actually went wrong
-const errorMessage = (err) => {
-    // The server answered with an error status
-    if (err.response) {
-        const reason = err.response.data?.reason;
-        if (err.response.status === 429) return "Too many requests to the weather service. Wait a minute and try again.";
-        return `The weather service returned an error (${err.response.status})${reason ? `: ${reason}` : ""}.`;
-    }
-    // The request was sent but nothing came back (offline, blocked, or timed out)
-    if (err.request) return "Couldn't reach the weather service. Check your connection and try again.";
-    // A bug in the app itself
-    return "Something went wrong while showing the weather. Details are in the browser console.";
-};
 
 export const useWeather = () => {
     const [weather, setWeather] = useState(null);
     const [selectedDay, setSelectedDay] = useState("");
     const [units, setUnits] = useState(METRIC);
+    // false, "new" (a different place: show the skeleton) or "refresh" (same place, e.g. new units)
     const [loading, setLoading] = useState(false);
-    const [error, setError] = useState("");
+    const [notFound, setNotFound] = useState(false);
+    // null, or { retry } for the API error page
+    const [error, setError] = useState(null);
     const [lastPlace, setLastPlace] = useState(null);
 
     // Id of the latest request, so an older, slower response can't overwrite a newer one
@@ -30,8 +19,9 @@ export const useWeather = () => {
     // Loads the weather for a place chosen in the search bar. Returns true on success
     const search = async (place, searchUnits = units, keepDay = false) => {
         const id = ++requestId.current;
-        setLoading(true);
-        setError("");
+        setLoading(keepDay ? "refresh" : "new");
+        setError(null);
+        setNotFound(false);
 
         try {
             const data = await fetchWeather(place, searchUnits);
@@ -44,11 +34,49 @@ export const useWeather = () => {
         } catch (err) {
             // Keep the real cause in the console so failures can be debugged
             console.error("Failed to load the weather:", err);
-            if (id === requestId.current) setError(errorMessage(err));
+            if (id === requestId.current) setError({ retry: () => search(place, searchUnits, keepDay) });
             return false;
         } finally {
             if (id === requestId.current) setLoading(false);
         }
+    };
+
+    // Looks up the text and loads its best match (used to retry a failed place search)
+    const searchByText = async (query) => {
+        const id = ++requestId.current;
+        setLoading("new");
+        setError(null);
+
+        try {
+            const places = await searchPlaces(query);
+            if (id !== requestId.current) return false;
+            if (!places.length) {
+                setLoading(false);
+                setNotFound(true);
+                return false;
+            }
+            return search(places[0]);
+        } catch (err) {
+            console.error("Failed to search for places:", err);
+            if (id === requestId.current) {
+                setLoading(false);
+                setError({ retry: () => searchByText(query) });
+            }
+            return false;
+        }
+    };
+
+    // Called by the search bar when a search has no matching place
+    const reportNotFound = () => {
+        requestId.current++; // ignore any weather request still running
+        setLoading(false);
+        setError(null);
+        setNotFound(true);
+    };
+
+    // Called by the search bar when the place search itself failed
+    const reportSearchError = (query) => {
+        setError({ retry: () => searchByText(query) });
     };
 
     // Save the new units and reload the current place with them (no new city lookup needed)
@@ -57,5 +85,17 @@ export const useWeather = () => {
         if (lastPlace) search(lastPlace, nextUnits, true);
     };
 
-    return { weather, search, selectedDay, setSelectedDay, units, changeUnits, loading, error };
+    return {
+        weather,
+        search,
+        selectedDay,
+        setSelectedDay,
+        units,
+        changeUnits,
+        loading,
+        notFound,
+        reportNotFound,
+        error,
+        reportSearchError,
+    };
 };

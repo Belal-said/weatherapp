@@ -2,6 +2,22 @@ import { getWeatherIcon } from "../utils/weatherIcon";
 import { fullDate } from "../utils/formatDate";
 
 export default function DayData({ current, country, name }) {
+    // Loading: no data yet
+    if (!current) {
+        return (
+            <div className="day-data">
+                <div className="hero hero-loading">
+                    <div className="loading-dots" aria-hidden="true">
+                        <span />
+                        <span />
+                        <span />
+                    </div>
+                    <p>Loading…</p>
+                </div>
+            </div>
+        );
+    }
+
     const icon = getWeatherIcon(current.code);
 
     return (
