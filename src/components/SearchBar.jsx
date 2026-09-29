@@ -76,9 +76,9 @@ const SearchBar = ({ onSearch, loading }) => {
                 {showList && (
                     <ul className="suggestions" id="place-list" role="listbox">
                         {searching && <li className="suggestion-status">Searching...</li>}
-                        {failed && <li className="suggestion-status">Couldn't search for places. Try again.</li>}
+                        {failed && <li className="suggestion-status">Couldn’t search for places. Try again.</li>}
                         {!searching && !failed && places.length === 0 && (
-                            <li className="suggestion-status">No places found for "{query.trim()}".</li>
+                            <li className="suggestion-status">No places found for “{query.trim()}”.</li>
                         )}
                         {places.map((place, index) => (
                             <li

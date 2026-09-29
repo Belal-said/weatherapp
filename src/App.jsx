@@ -19,7 +19,7 @@ function App() {
 
             {/* <main> is the page's main landmark: everything below the header */}
             <main className="main-content">
-                <h1>How's the sky looking today?</h1>
+                <h1>How’s the sky looking today?</h1>
                 <div className="body-container">
                     <SearchBar onSearch={search} loading={loading} />
 
