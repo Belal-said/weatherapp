@@ -1,3 +1,23 @@
+:root {
+    /* Colors */
+    --color-text: white;
+    --color-bg: rgb(1, 1, 52);
+    --color-surface: #262840;
+    --color-panel: #2e3047;
+    --color-border: #3a3b55;
+    --color-control: #3c3b5e;
+    --color-control-hover: #45446b;
+    --color-accent: #4147bf;
+    --color-accent-dark: #2a26a6;
+    --color-text-input: rgb(235, 233, 233);
+    --color-text-soft: rgb(212, 209, 209);
+    --color-text-muted: rgb(173, 172, 172);
+    --color-error: #ff8a80;
+
+    /* Effects */
+    --shadow-color: rgba(0, 0, 0, 0.4);
+}
+
 * {
     padding: 0;
     margin: 0;
@@ -6,8 +26,8 @@
 }
 
 body {
-    background-color: rgb(1, 1, 52);
-    color: white;
+    background-color: var(--color-bg);
+    color: var(--color-text);
     font-family: Arial, Helvetica, sans-serif;
     scrollbar-width: none;
 }
@@ -38,15 +58,10 @@ body {
     justify-content: center;
     align-items: center;
     gap: 3rem;
-    padding-bottom: 2rem;
+    padding-block-end: 2rem;
 }
 
-@media (max-width: 600px) {
-    .body {
-        padding-bottom: 1rem;
-        margin-bottom: 1rem;
-    }
-
+@media (max-width: 37.5em) {
     .container h1 {
         text-align: center;
     }
@@ -71,9 +86,9 @@ body {
 .input-div {
     position: relative; /* anchors the suggestions list */
     display: flex;
-    height: 40px;
+    height: 2.5rem;
     width: 100%;
-    background-color: #262840;
+    background-color: var(--color-surface);
     align-items: center;
     padding: 0 0.5rem;
     border-radius: 0.5rem;
@@ -81,7 +96,7 @@ body {
 
 .input-div input {
     flex: 1;
-    color: rgb(235, 233, 233);
+    color: var(--color-text-input);
     outline: none;
     font-size: 1rem;
     padding: 0 1rem;
@@ -93,16 +108,16 @@ body {
 }
 
 .search-button {
-    background-color: #4147bf;
-    color: white;
+    background-color: var(--color-accent);
+    color: var(--color-text);
     border: none;
     padding: 0 1.5rem;
     border-radius: 0.5rem;
     cursor: pointer;
-    height: 40px;
+    height: 2.5rem;
 }
 
-@media (max-width: 600px) {
+@media (max-width: 37.5em) {
     .search {
         flex-direction: column;
         width: 100%;
@@ -132,9 +147,9 @@ body {
     gap: 2rem;
 }
 
-@media (max-width: 600px) {
+@media (max-width: 37.5em) {
     .data {
-        padding-bottom: 1rem;
+        padding-block-end: 1rem;
     }
     .main-data {
         gap: 2rem;
@@ -146,7 +161,7 @@ body {
     display: flex;
     flex-direction: column;
     gap: 1rem;
-    background-color: #2e3047;
+    background-color: var(--color-panel);
     padding: 1rem;
     border-radius: 0.75rem;
     scrollbar-width: none;
@@ -163,7 +178,7 @@ body {
 }
 
 .hourly-data-header h4 {
-    font-size: 14px;
+    font-size: 0.875rem;
     font-weight: bold;
     white-space: nowrap;
 }
@@ -178,8 +193,8 @@ body {
     align-items: center;
     gap: 0.75rem;
     padding: 0.5rem 1rem;
-    background-color: #3c3b5e;
-    color: white;
+    background-color: var(--color-control);
+    color: var(--color-text);
     border: none;
     border-radius: 0.5rem;
     font-size: 0.95rem;
@@ -188,17 +203,14 @@ body {
 
 .day-select-button:hover,
 .day-select-button[aria-expanded="true"] {
-    background-color: #45446b;
+    background-color: var(--color-control-hover);
 }
 
-.day-select-button:focus-visible,
-.day-select-menu:focus-visible {
-    outline: 2px solid white;
-    outline-offset: 2px;
-}
-
-.day-select-chevron {
-    transition: transform 0.2s;
+/* Animate only when the user hasn't asked their system for reduced motion */
+@media (prefers-reduced-motion: no-preference) {
+    .day-select-chevron {
+        transition: transform 0.2s;
+    }
 }
 
 .day-select-chevron.open {
@@ -207,16 +219,22 @@ body {
 
 .day-select-menu {
     position: absolute;
-    right: 0;
-    top: calc(100% + 0.5rem);
+    inset-inline-end: 0;
+    inset-block-start: calc(100% + 0.5rem);
     z-index: 20;
-    width: 214px;
+    width: 13.375rem;
     padding: 0.5rem;
     list-style: none;
-    background-color: #262840;
-    border: 1px solid #3a3b55;
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
     border-radius: 0.75rem;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    box-shadow: 0 10px 30px var(--shadow-color);
+}
+
+.day-select-button:focus-visible,
+.day-select-menu:focus-visible {
+    outline: 2px solid var(--color-text);
+    outline-offset: 2px;
 }
 
 .day-select-option {
@@ -231,11 +249,11 @@ body {
 
 .day-select-option.active,
 .day-select-option.selected {
-    background-color: #3a3b55;
+    background-color: var(--color-border);
 }
 
 .day-select-option + .day-select-option {
-    margin-top: 0.25rem;
+    margin-block-start: 0.25rem;
 }
 
 .hourly-div {
@@ -254,7 +272,7 @@ body {
     justify-content: space-between;
     gap: 4rem;
     padding: 1.2rem 1rem;
-    background-color: #262840;
+    background-color: var(--color-surface);
     border-radius: 0.5rem;
 }
 
@@ -270,7 +288,7 @@ body {
     justify-content: space-between;
     align-items: center;
     padding: 6rem 2rem;
-    background: linear-gradient(to right, #4147bf, #2a26a6);
+    background: linear-gradient(to right, var(--color-accent), var(--color-accent-dark));
     border-radius: 1rem;
 }
 
@@ -285,7 +303,7 @@ body {
 }
 
 .hero-temp {
-    font-size: 72px;
+    font-size: 4.5rem;
     font-weight: 700;
     font-style: italic;
 }
@@ -295,10 +313,10 @@ body {
     gap: 2rem;
     justify-content: center;
     align-items: center;
-    padding-right: 2rem;
+    padding-inline-end: 2rem;
 }
 
-@media (max-width: 600px) {
+@media (max-width: 37.5em) {
     .hero {
         display: flex;
         flex-direction: column;
@@ -307,7 +325,7 @@ body {
         align-items: center;
         gap: 2rem;
         padding: 4rem 2rem;
-        background: linear-gradient(to right, #4147bf, #2a26a6);
+        background: linear-gradient(to right, var(--color-accent), var(--color-accent-dark));
         border-radius: 1rem;
     }
 
@@ -316,7 +334,7 @@ body {
     }
 
     .hero-left p {
-        color: rgb(173, 172, 172);
+        color: var(--color-text-muted);
         font-weight: bold;
     }
 }
@@ -335,21 +353,21 @@ body {
     min-width: 0;
     padding: 1.25rem;
     align-items: flex-start;
-    background-color: #262840;
+    background-color: var(--color-surface);
     gap: 1.5rem;
     border-radius: 1rem;
 }
 
 .item-title {
     font-size: 1.125rem;
-    color: rgb(212, 209, 209);
+    color: var(--color-text-soft);
 }
 
 .item-value {
     font-size: 2rem;
 }
 
-@media (max-width: 600px) {
+@media (max-width: 37.5em) {
     .container {
         width: 90%;
     }
@@ -369,7 +387,7 @@ body {
         flex-direction: column;
         padding: 1rem;
         align-items: flex-start;
-        background-color: #262840;
+        background-color: var(--color-surface);
         width: 100%;
         gap: 2rem;
         border-radius: 1rem;
@@ -377,7 +395,7 @@ body {
 
     .item-title {
         font-size: 1.5rem;
-        color: rgb(212, 209, 209);
+        color: var(--color-text-soft);
     }
 
     .item-value {
@@ -403,7 +421,7 @@ body {
     justify-content: center;
     align-items: center;
     gap: 2rem;
-    background-color: #262840;
+    background-color: var(--color-surface);
     padding: 1rem 0.5rem;
     border-radius: 0.5rem;
 }
@@ -414,7 +432,7 @@ body {
     gap: 1.3rem;
 }
 
-@media (max-width: 600px) {
+@media (max-width: 37.5em) {
     .days {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
@@ -427,7 +445,7 @@ body {
         justify-content: center;
         align-items: center;
         gap: 1.5rem;
-        background-color: #262840;
+        background-color: var(--color-surface);
         padding: 1rem 0.5rem;
         border-radius: 0.5rem;
     }
@@ -436,7 +454,7 @@ body {
         display: flex;
         justify-content: space-between;
         gap: 1rem;
-        font-size: 14px;
+        font-size: 0.875rem;
     }
 }
 
@@ -458,15 +476,15 @@ body {
     font-size: 1.2rem;
 }
 
-@media (max-width: 600px) {
+@media (max-width: 37.5em) {
     .hourly-data {
-        padding-bottom: 1rem;
-        margin-bottom: 1rem;
+        padding-block-end: 1rem;
+        margin-block-end: 1rem;
     }
 }
 
 /* Tablets and phones: stack the forecast and the hourly panel */
-@media (max-width: 1024px) {
+@media (max-width: 64em) {
     .data {
         flex-direction: column;
     }
@@ -479,7 +497,7 @@ body {
     /* No side column to match, so the list gets its own height */
     .hourly-div {
         flex: none;
-        max-height: 480px;
+        max-height: 30rem;
     }
 }
 /* Units menu */
@@ -492,8 +510,8 @@ body {
     align-items: center;
     gap: 0.5rem;
     padding: 0.6rem 1rem;
-    background-color: #262840;
-    color: white;
+    background-color: var(--color-surface);
+    color: var(--color-text);
     border: none;
     border-radius: 0.5rem;
     font-size: 0.95rem;
@@ -502,20 +520,20 @@ body {
 
 .units-button:hover,
 .units-button[aria-expanded="true"] {
-    background-color: #2e3047;
+    background-color: var(--color-panel);
 }
 
 .units-menu {
     position: absolute;
-    right: 0;
-    top: calc(100% + 0.5rem);
+    inset-inline-end: 0;
+    inset-block-start: calc(100% + 0.5rem);
     z-index: 20;
-    width: 220px;
+    width: 13.75rem;
     padding: 0.5rem;
-    background-color: #262840;
-    border: 1px solid #3a3b55;
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
     border-radius: 0.75rem;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    box-shadow: 0 10px 30px var(--shadow-color);
 }
 
 .units-switch,
@@ -526,39 +544,39 @@ body {
     width: 100%;
     padding: 0.5rem 0.6rem;
     background: none;
-    color: white;
+    color: var(--color-text);
     border: none;
     border-radius: 0.4rem;
     font-size: 0.9rem;
-    text-align: left;
+    text-align: start;
     cursor: pointer;
 }
 
 .units-switch:hover,
 .units-option:hover,
 .units-option.active {
-    background-color: #3a3b55;
+    background-color: var(--color-border);
 }
 
 .units-group {
-    padding-top: 0.5rem;
-    margin-top: 0.5rem;
-    border-top: 1px solid #3a3b55;
+    padding-block-start: 0.5rem;
+    margin-block-start: 0.5rem;
+    border-block-start: 1px solid var(--color-border);
 }
 
 .units-group-title {
     padding: 0 0.6rem 0.25rem;
     font-size: 0.75rem;
-    color: rgb(173, 172, 172);
+    color: var(--color-text-muted);
 }
 
 /* Status messages */
 .status {
-    color: rgb(212, 209, 209);
+    color: var(--color-text-soft);
 }
 
 .status.error {
-    color: #ff8a80;
+    color: var(--color-error);
 }
 
 .search-button:disabled {
@@ -568,23 +586,23 @@ body {
 
 /* Hero icon (emoji) */
 .day-icon {
-    font-size: 72px;
+    font-size: 4.5rem;
     line-height: 1;
 }
 
 /* Place suggestions */
 .suggestions {
     position: absolute;
-    top: calc(100% + 0.4rem);
-    left: 0;
-    right: 0;
+    inset-block-start: calc(100% + 0.4rem);
+    inset-inline-start: 0;
+    inset-inline-end: 0;
     z-index: 30;
     padding: 0.4rem;
     list-style: none;
-    background-color: #262840;
-    border: 1px solid #3a3b55;
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
     border-radius: 0.5rem;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    box-shadow: 0 10px 30px var(--shadow-color);
 }
 
 .suggestion {
@@ -597,7 +615,7 @@ body {
 }
 
 .suggestion.active {
-    background-color: #3a3b55;
+    background-color: var(--color-border);
 }
 
 .suggestion-name {
@@ -607,7 +625,7 @@ body {
 .suggestion-details,
 .suggestion-status {
     font-size: 0.85rem;
-    color: rgb(173, 172, 172);
+    color: var(--color-text-muted);
 }
 
 .suggestion-status {
