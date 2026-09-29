@@ -449,7 +449,7 @@ A `Place` is `{ id, name, region, country, latitude, longitude }`.
 - [x] Cache forecast and place results in `localStorage`
 - [ ] Detect the user's location on first visit
 - [ ] Remember the last searched city
-- [x] Tablet breakpoint (1024px): the hourly panel stacks below the forecast
+- [x] Responsive from 320px to wide screens: side by side from 1200px, stacked below it, phone layout below 600px, extra-small tweaks below 360px
 - [ ] Unit tests for `api/` and `utils/`
 
 ## Contributing
